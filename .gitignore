@@ -130,3 +130,6 @@ dmypy.json
 
 #macOS Files
 .DS_Store
+
+# Script Result
+dino_stats_last_run.csv
