@@ -15,4 +15,13 @@ logger.setLevel(logging.INFO)
 def lambda_handler(event, context):
     print(event)
     dino = event.get('pathParameters').get('dinoNumber')
-    return dino
+
+    isKarma = None
+    queryParams = event.get('queryStringParameters')
+    if queryParams is not None:
+        isKarmaString = queryParams.get('isKarma')
+        trueValues = ['true', '1', 't', 'y', 'yes']
+        isKarma = isKarmaString.lower() in trueValues
+    else:
+        isKarma = False
+    return f'dino:{dino},isKarma:{isKarma}'
