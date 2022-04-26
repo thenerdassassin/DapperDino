@@ -17,6 +17,7 @@ logger.setLevel(logging.INFO)
 BUCKET = 'dapper-dinos-csv-files'
 DINO_STATS_KEY = 'dino_stats_final.csv'
 KARMA_TO_DINO_KEY = 'dapper_karma_to_dino.csv'
+DINO_TRAITS_KEY = 'dapper_dino_traits.csv'
 
 # TODO: Refactor to use pandas
 def getOriginalDinoNumber(karmaNumber):
@@ -25,9 +26,43 @@ def getOriginalDinoNumber(karmaNumber):
         if f'{karmaNumber},' in csvLine:
             return int(csvLine.split(",")[-1])
 
+def getAndSetStats(dapperDino):
+    dinoStats = getDinoStats()
+    originalDinoNumber = int(dapperDino.originalDinoNumber)
+
+    # TODO: Refactor...This is ugly.
+    dapperDino.setStats(
+        int(dinoStats.loc[originalDinoNumber].at['Acceleration']),
+        int(dinoStats.loc[originalDinoNumber].at['Agility']),
+        int(dinoStats.loc[originalDinoNumber].at['Attack']),
+        int(dinoStats.loc[originalDinoNumber].at['Defense']),
+        int(dinoStats.loc[originalDinoNumber].at['Health']),
+        int(dinoStats.loc[originalDinoNumber].at['Speed']),
+    )
+
 def getDinoStats():
     dinoStatCsv = readFileFromS3(BUCKET, DINO_STATS_KEY)
     return pandas.read_csv(dinoStatCsv, index_col=0)
+
+def getAndSetTraits(dapperDino):
+    dinoTraits = getDinoTraits()
+    originalDinoNumber = int(dapperDino.originalDinoNumber)
+
+    # TODO: Refactor...This is ugly.
+    dapperDino.setTraits(
+        background = str(dinoTraits.loc[originalDinoNumber].at['Background']),
+        body = str(dinoTraits.loc[originalDinoNumber].at['Body']),
+        face = str(dinoTraits.loc[originalDinoNumber].at['Face']),
+        headwear = str(dinoTraits.loc[originalDinoNumber].at['Headwear']),
+        eyes = str(dinoTraits.loc[originalDinoNumber].at['Eyes']),
+        clothes = str(dinoTraits.loc[originalDinoNumber].at['Clothes']),
+        accessory = str(dinoTraits.loc[originalDinoNumber].at['Accessory']),
+    )
+
+# TODO: Repetitive code...refactor.
+def getDinoTraits():
+    dinoTraitsCsv = readFileFromS3(BUCKET, DINO_TRAITS_KEY)
+    return pandas.read_csv(dinoTraitsCsv, index_col=0)
 
 # For example code see: https://github.com/awsdocs/aws-doc-sdk-examples/blob/main/python/example_code/lambda/lambda_handler_basic.py
 def lambda_handler(event, context):
@@ -48,17 +83,9 @@ def lambda_handler(event, context):
     print(f'Getting stats. Dino: {dino}, isKarma:{isKarma}, ogDinoNum: {originalDinoNumber}')
     
     dapperDino = DapperDino(dino, isKarma, originalDinoNumber)
-    dinoStats = getDinoStats()
 
-    # TODO: Refactor...This is ugly.
-    dapperDino.setStats(
-        int(dinoStats.loc[originalDinoNumber].at['Acceleration']),
-        int(dinoStats.loc[originalDinoNumber].at['Agility']),
-        int(dinoStats.loc[originalDinoNumber].at['Attack']),
-        int(dinoStats.loc[originalDinoNumber].at['Defense']),
-        int(dinoStats.loc[originalDinoNumber].at['Health']),
-        int(dinoStats.loc[originalDinoNumber].at['Speed']),
-    )
+    getAndSetStats(dapperDino)
+    getAndSetTraits(dapperDino)
     
     results = dapperDino.toJson()
     print(results)
