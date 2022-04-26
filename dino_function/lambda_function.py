@@ -18,6 +18,7 @@ BUCKET = 'dapper-dinos-csv-files'
 DINO_STATS_KEY = 'dino_stats_final.csv'
 KARMA_TO_DINO_KEY = 'dapper_karma_to_dino.csv'
 
+# TODO: Refactor to use pandas
 def getOriginalDinoNumber(karmaNumber):
     karmaToDinoCsv = readStringFromS3(BUCKET, KARMA_TO_DINO_KEY)
     for csvLine in karmaToDinoCsv.splitlines():
@@ -33,21 +34,23 @@ def lambda_handler(event, context):
     print(event)
     dino = event.get('pathParameters').get('dinoNumber')
 
-    isKarma = None
+    isKarma = False
     queryParams = event.get('queryStringParameters')
     if queryParams is not None:
         isKarmaString = queryParams.get('isKarma')
         trueValues = ['true', '1', 't', 'y', 'yes']
         isKarma = isKarmaString.lower() in trueValues
-    else:
-        isKarma = False
 
     originalDinoNumber = int(dino)
     if isKarma:
         originalDinoNumber = getOriginalDinoNumber(dino)
     
+    print(f'Getting stats. Dino: {dino}, isKarma:{isKarma}, ogDinoNum: {originalDinoNumber}')
+    
     dapperDino = DapperDino(dino, isKarma, originalDinoNumber)
     dinoStats = getDinoStats()
+
+    # TODO: Refactor...This is ugly.
     dapperDino.setStats(
         int(dinoStats.loc[originalDinoNumber].at['Acceleration']),
         int(dinoStats.loc[originalDinoNumber].at['Agility']),
@@ -57,4 +60,6 @@ def lambda_handler(event, context):
         int(dinoStats.loc[originalDinoNumber].at['Speed']),
     )
     
-    return dapperDino.toJson()
+    results = dapperDino.toJson()
+    print(results)
+    return results
