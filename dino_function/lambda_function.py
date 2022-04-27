@@ -18,6 +18,8 @@ BUCKET = 'dapper-dinos-csv-files'
 DINO_STATS_KEY = 'dino_stats_final.csv'
 KARMA_TO_DINO_KEY = 'dapper_karma_to_dino.csv'
 DINO_TRAITS_KEY = 'dapper_dino_traits.csv'
+TRAIT_TO_STAT_KEY = 'traitToStatMap.csv'
+MAX_VALUE_COLUMN = 'MaxCap'
 
 # TODO: Refactor to use pandas
 def getOriginalDinoNumber(karmaNumber):
@@ -64,6 +66,27 @@ def getDinoTraits():
     dinoTraitsCsv = readFileFromS3(BUCKET, DINO_TRAITS_KEY)
     return pandas.read_csv(dinoTraitsCsv, index_col=0)
 
+def getMaxStatFromMap(traitToStatMap, traitValue, trait):
+    if (traitValue == "<none>"):
+        traitValue = f'NONE_{trait}'
+    traitValue = traitValue.upper()
+    print(f'Getting trait: {traitValue}')
+    return int(traitToStatMap.loc[traitValue].at[MAX_VALUE_COLUMN])
+
+def getAndSetMaxStats(dapperDino):
+    traitToStatCsv = readFileFromS3(BUCKET, TRAIT_TO_STAT_KEY)
+    traitToStatMap = pandas.read_csv(traitToStatCsv, index_col=0)
+
+    dapperDino.setMaxStats(
+        maxAcceleration = getMaxStatFromMap(traitToStatMap, dapperDino.traits.eyes, "eyes"),
+        maxAgility = getMaxStatFromMap(traitToStatMap, dapperDino.traits.face, "face"),
+        maxAttack = getMaxStatFromMap(traitToStatMap, dapperDino.traits.clothes, "clothes"),
+        maxDefense = getMaxStatFromMap(traitToStatMap, dapperDino.traits.headwear, "headwear"),
+        maxHealth = getMaxStatFromMap(traitToStatMap, dapperDino.traits.background, "background"),
+        maxSpeed = getMaxStatFromMap(traitToStatMap, dapperDino.traits.body, "body"),
+        bonusPoints = getMaxStatFromMap(traitToStatMap, dapperDino.traits.accessory, "accessory")
+    )
+
 # For example code see: https://github.com/awsdocs/aws-doc-sdk-examples/blob/main/python/example_code/lambda/lambda_handler_basic.py
 def lambda_handler(event, context):
     print(event)
@@ -86,6 +109,7 @@ def lambda_handler(event, context):
 
     getAndSetStats(dapperDino)
     getAndSetTraits(dapperDino)
+    getAndSetMaxStats(dapperDino)
     
     results = dapperDino.toJson()
     print(results)
