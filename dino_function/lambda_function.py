@@ -6,6 +6,7 @@ Implement an AWS Lambda function that handles input from direct
 invocation.
 """
 
+import json
 import logging
 import pandas
 from aws_handlers import readFileFromS3, readStringFromS3
@@ -113,4 +114,12 @@ def lambda_handler(event, context):
     
     results = dapperDino.toJson()
     print(results)
-    return results
+    return {
+        'statusCode': 200,
+        'headers': {
+            'Access-Control-Allow-Headers': 'Content-Type',
+            'Access-Control-Allow-Origin': '*',
+            'Access-Control-Allow-Methods': 'GET'
+        },
+        'body': json.dumps(results)
+    }
