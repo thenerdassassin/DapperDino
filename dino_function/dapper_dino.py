@@ -1,7 +1,8 @@
 import json
 
 class DapperDinoTraits:
-    def __init__(self, eyes, face, clothes, headwear, background, body, accessory):
+    def __init__(self, image, eyes, face, clothes, headwear, background, body, accessory):
+        self.image = image
         self.eyes = eyes
         self.face = face
         self.clothes = clothes
@@ -12,6 +13,7 @@ class DapperDinoTraits:
 
     def reprJSON(self):
         return dict(
+            image = self.image,
             eyes = self.eyes,
             face = self.face,
             clothes = self.clothes,
@@ -79,8 +81,8 @@ class DapperDino:
     def setMaxStats(self, maxAcceleration, maxAgility, maxAttack, maxDefense, maxHealth, maxSpeed, bonusPoints):
         self.stats.setMaxStats(maxAcceleration, maxAgility, maxAttack, maxDefense, maxHealth, maxSpeed, bonusPoints)
 
-    def setTraits(self, eyes, face, clothes, headwear, background, body, accessory):
-        self.traits = DapperDinoTraits(eyes, face, clothes, headwear, background, body, accessory)
+    def setTraits(self, image, eyes, face, clothes, headwear, background, body, accessory):
+        self.traits = DapperDinoTraits(image, eyes, face, clothes, headwear, background, body, accessory)
 
     def toJson(self) -> str:
         return json.dumps(self.__dict__, cls=DapperDinoEncoder)
