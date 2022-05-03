@@ -53,6 +53,7 @@ def getAndSetTraits(dapperDino):
 
     # TODO: Refactor...This is ugly.
     dapperDino.setTraits(
+        image = str(dinoTraits.loc[originalDinoNumber].at['Image']),
         background = str(dinoTraits.loc[originalDinoNumber].at['Background']),
         body = str(dinoTraits.loc[originalDinoNumber].at['Body']),
         face = str(dinoTraits.loc[originalDinoNumber].at['Face']),
@@ -70,6 +71,15 @@ def getDinoTraits():
 def getMaxStatFromMap(traitToStatMap, traitValue, trait):
     if (traitValue == "<none>"):
         traitValue = f'NONE_{trait}'
+    if (trait == "background"):
+        if (traitValue.find("Rich Tu") != -1):
+            traitValue = "Rich Tu"
+        elif (traitValue.find("Hatch")):
+            traitValue = "Hatch"
+        elif (traitValue.find("Bakeroner Yellow")):
+            traitValue = "Bakeroner Yellow"
+        elif (traitValue.find("Bakeroner Green")):
+            traitValue = "Bakeroner Green"
     traitValue = traitValue.upper()
     print(f'Getting trait: {traitValue}')
     return int(traitToStatMap.loc[traitValue].at[MAX_VALUE_COLUMN])
@@ -95,7 +105,7 @@ def lambda_handler(event, context):
 
     isKarma = False
     queryParams = event.get('queryStringParameters')
-    if queryParams is not None:
+    if queryParams is not None and queryParams.get('isKarma') is not None:
         isKarmaString = queryParams.get('isKarma')
         trueValues = ['true', '1', 't', 'y', 'yes']
         isKarma = isKarmaString.lower() in trueValues
