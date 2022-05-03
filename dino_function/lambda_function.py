@@ -43,6 +43,31 @@ def getAndSetStats(dapperDino):
         int(dinoStats.loc[originalDinoNumber].at['Speed']),
     )
 
+    setPercentiles(dapperDino, dinoStats, originalDinoNumber)
+
+def setPercentiles(dapperDino, dinoStats, originalDinoNumber):
+    # Add Percentile Columns
+    dinoStats['Defense Percentile'] = stat_percentiles(dinoStats, 'Defense' )
+    dinoStats['Speed Percentile'] = stat_percentiles(dinoStats, 'Speed' )
+    dinoStats['Health Percentile'] = stat_percentiles(dinoStats, 'Health' )
+    dinoStats['Attack Percentile'] = stat_percentiles(dinoStats, 'Attack' )
+    dinoStats['Acceleration Percentile'] = stat_percentiles(dinoStats, 'Acceleration' )
+    dinoStats['Agility Percentile'] = stat_percentiles(dinoStats, 'Agility')
+
+    dapperDino.setPercentiles(
+        round(float(dinoStats.loc[originalDinoNumber].at['Acceleration Percentile']), 2),
+        round(float(dinoStats.loc[originalDinoNumber].at['Agility Percentile']), 2),
+        round(float(dinoStats.loc[originalDinoNumber].at['Attack Percentile']), 2),
+        round(float(dinoStats.loc[originalDinoNumber].at['Defense Percentile']), 2),
+        round(float(dinoStats.loc[originalDinoNumber].at['Health Percentile']), 2),
+        round(float(dinoStats.loc[originalDinoNumber].at['Speed Percentile']), 2),
+    )
+
+def stat_percentiles(dino_stats, col):
+    percent = dino_stats[col].rank(pct = True)
+    percent = (percent * 100).round(2).astype(float)
+    return (100 - percent)
+
 def getDinoStats():
     dinoStatCsv = readFileFromS3(BUCKET, DINO_STATS_KEY)
     return pandas.read_csv(dinoStatCsv, index_col=0)
@@ -97,6 +122,8 @@ def getAndSetMaxStats(dapperDino):
         maxSpeed = getMaxStatFromMap(traitToStatMap, dapperDino.traits.body, "body"),
         bonusPoints = getMaxStatFromMap(traitToStatMap, dapperDino.traits.accessory, "accessory")
     )
+
+
 
 # For example code see: https://github.com/awsdocs/aws-doc-sdk-examples/blob/main/python/example_code/lambda/lambda_handler_basic.py
 def lambda_handler(event, context):
