@@ -99,11 +99,11 @@ def getMaxStatFromMap(traitToStatMap, traitValue, trait):
     if (trait == "background"):
         if (traitValue.find("Rich Tu") != -1):
             traitValue = "Rich Tu"
-        elif (traitValue.find("Hatch")):
+        elif (traitValue.find("Hatch") != -1):
             traitValue = "Hatch"
-        elif (traitValue.find("Bakeroner Yellow")):
+        elif (traitValue.find("Bakeroner Yellow") != -1):
             traitValue = "Bakeroner Yellow"
-        elif (traitValue.find("Bakeroner Green")):
+        elif (traitValue.find("Bakeroner Green") != -1):
             traitValue = "Bakeroner Green"
     traitValue = traitValue.upper()
     print(f'Getting trait: {traitValue}')
