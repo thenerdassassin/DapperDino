@@ -8,7 +8,7 @@ from dino_app_scraper.dino_website.stat_page import writeStatsToFile, getDinoSta
 NUM_THREADS = 10
 MAX_DINO = 9973
 STEP = math.ceil(MAX_DINO/NUM_THREADS)
-dinoStartIndices = range(1, MAX_DINO+1, STEP)
+dinoStartIndices = range(0, MAX_DINO+1, STEP)
 
 class DinoAppScraper:
     @staticmethod
